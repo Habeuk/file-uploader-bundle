@@ -1,0 +1,43 @@
+{# templates/form/types/files_upload_js.html.twig #}
+{% block files_upload_js_widget %}    
+<div class="w-full" 
+     {{ stimulus_controller('upload-files') }} 
+     {{ block('widget_container_attributes') }}>
+    
+    {# Le champ caché contenant les IDs soumis au serveur #}
+    {{ form_widget(form.fids) }}
+
+    {# Zone de Drag & Drop (Cachée par défaut via 'hidden', affichée par Stimulus en 'flex') #}
+    <div data-upload-files-target="dropzone"
+         class="group relative flex flex-col items-center justify-center w-full min-h-[150px] p-6 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 hover:border-indigo-500 dark:hover:border-indigo-400 transition-all duration-200 ease-in-out cursor-pointer focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 mb-3">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" 
+             fill="currentColor" 
+             viewBox="0 0 640 512" 
+             class="w-12 h-12 text-slate-400 group-hover:text-indigo-500 group-hover:scale-110 transition-all duration-200 ease-in-out mb-3">
+            <path d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9C101 191.3 101 183.7 101 176c0-88.4 71.6-160 160-160 59.3 0 111 32.2 138.7 80.2C411.7 84.4 427.5 80 444 80c68.5 0 124 55.5 124 124 0 10.3-1.3 20.2-3.6 29.7C608.4 251.2 640 297.7 640 352c0 70.7-57.3 128-128 128H144zm183-297c-9.4-9.4-24.6-9.4-33.9 0l-72 72c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l31-31V376c0 13.3 10.7 24 24 24s24-10.7 24-24V257.9l31 31c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-72-72z"/>
+        </svg>
+        
+        <span class="text-sm font-medium text-slate-600 dark:text-slate-400 text-center select-none group-hover:text-slate-800 dark:group-hover:text-slate-200">
+            {{ text_display_upload }}
+        </span>
+        
+        {# Input natif invisible servant de déclencheur d'upload et d'ancrage d'accessibilité #}
+        <input type="file" 
+               id="{{ form.fids.vars.id }}_file"
+               accept="{{ attr['data-mime-types']|default('image/*') }}" 
+               data-upload-files-target="input"
+               {% if multiple %}multiple{% endif %} 
+               class="hidden"
+               aria-label="{{ text_display_upload }}">
+    </div>  
+
+    {# Conteneur des Previews (Géré de façon asynchrone par JS ou rendu initial via data-previews) #}
+    <div data-upload-files-target="previews" 
+         class="flex flex-wrap gap-3 empty:hidden">
+         {# Laissé volontairement vide à l'initialisation HTML pure #}
+         {# Ton contrôleur Stimulus lira `data-previews` pour injecter les blocs de manière uniforme, #}
+         {# évitant ainsi la duplication de logique HTML d'affichage entre Twig et le JS. #}
+    </div>
+</div>
+{% endblock %}
