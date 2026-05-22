@@ -1,0 +1,19 @@
+{
+    "name": "habeuk/file-uploader-bundle",
+    "description": "help to upload files and images",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Habeuk\\FileUploaderBundle\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kouwa stephane",
+            "email": "kksasteph888@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
