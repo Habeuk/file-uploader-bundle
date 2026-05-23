@@ -98,10 +98,6 @@ class Files {
     $this->updatedAt = $now;
   }
 
-  static public function getValidMimeTypes(): array {
-    return AllowedMimeType::values();
-  }
-
   public function getPublicFile(): ?File {
     return $this->publicFile;
   }
@@ -171,7 +167,6 @@ class Files {
 
   public function setMimeType(?string $MimeType): static {
     $this->mimeType = $MimeType;
-
     return $this;
   }
 
@@ -213,5 +208,22 @@ class Files {
     }
     $this->user = $user;
     return $this;
+  }
+
+  /**
+   * Retourne le type de média déduit du MIME type.
+   */
+  public function getMediaType(): string {
+    return match (true) {
+      str_starts_with($this->mimeType ?? '', 'image/') => 'image',
+      str_contains($this->mimeType ?? '', 'pdf') => 'pdf',
+      str_contains($this->mimeType ?? '', 'zip') || str_contains($this->mimeType ?? '', 'rar') || str_contains($this->mimeType ?? '', 'tar') ||
+      str_contains($this->mimeType ?? '', '7z') => 'archive',
+      str_contains($this->mimeType ?? '', 'text/') || str_contains($this->mimeType ?? '', 'csv') || str_contains($this->mimeType ?? '', 'json') ||
+      str_contains($this->mimeType ?? '', 'xml') => 'document',
+      str_starts_with($this->mimeType ?? '', 'audio/') => 'audio',
+      str_starts_with($this->mimeType ?? '', 'video/') => 'video',
+      default => 'file'
+    };
   }
 }

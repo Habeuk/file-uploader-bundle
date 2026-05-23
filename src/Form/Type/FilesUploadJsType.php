@@ -14,9 +14,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
+/**
+ *
+ * @author stephane
+ * @extends AbstractType<mixed>
+ */
 class FilesUploadJsType extends AbstractType {
-
-  private bool $isMultiple = false;
 
   public function __construct(private EntityManagerInterface $em, private CsrfTokenManagerInterface $csrfTokenManager) {}
 
@@ -46,10 +49,11 @@ class FilesUploadJsType extends AbstractType {
 
   public function buildForm(FormBuilderInterface $builder, array $options): void {
     /** @var bool $isMultiple */
-    $isMultiple = $options['multiple'];
+    $isMultiple = (bool) $options['multiple'];
+    $isRequired = (bool) $options['required'];
     $constraints = [];
-    if ($options['required']) {
-      $constraints = $options['multiple'] ? [
+    if ($isRequired) {
+      $constraints = $isMultiple ? [
         new Assert\Length(minMessage: $options['required_message'], min: 3)
       ] : [
         new Assert\NotBlank(message: $options['required_message'])
@@ -61,19 +65,11 @@ class FilesUploadJsType extends AbstractType {
         'class' => 'files-upload-js-input',
         'data-max-size' => $options['max_size'],
         'data-mime-types' => implode(",", $options['mime_types']),
-        'data-multiple' => $options['multiple'] ? "true" : "false",
+        'data-multiple' => $isMultiple ? "true" : "false",
         'data-type' => $options['type']
       ]
     ]);
 
-    // Transformer pour convertir entre les IDs et les entités Files
-    // $builder->addModelTransformer(new CallbackTransformer([
-    // $this,
-    // 'transform'
-    // ], [
-    // $this,
-    // 'reverseTransform'
-    // ]));
     $builder->addModelTransformer(new CallbackTransformer(function (mixed $modelData) use ($isMultiple): array {
       return $this->transformToView($modelData, $isMultiple);
     }, function (mixed $viewData) use ($isMultiple): mixed {
@@ -83,14 +79,14 @@ class FilesUploadJsType extends AbstractType {
 
   public function transformToView(mixed $datas, bool $isMultiple): mixed {
     // De l'entité vers le formulaire (model → view)
-    if (empty($datas)) {
+    if ($datas === null || $datas === []) {
       return [
         'fids' => null,
         'files' => []
       ];
     }
     if ($datas instanceof Files) {
-      return $datas ? [
+      return $datas->getId() > 0 ? [
         'fids' => $datas->getId(),
         'files' => [
           $datas
@@ -119,7 +115,7 @@ class FilesUploadJsType extends AbstractType {
 
   public function reverseTransformToModel(mixed $data, bool $isMultiple): mixed {
     // Du formulaire vers l'entité (view → model)
-    if (! is_array($data) || empty($data['fids'])) {
+    if (! is_array($data) || $data['fids'] === null || $data['fids'] === '') {
       return $isMultiple ? new ArrayCollection() : null;
     }
     $fids = $data['fids'];
@@ -128,7 +124,7 @@ class FilesUploadJsType extends AbstractType {
     }
     $fids = json_decode($data['fids'], true);
     $files = [];
-    if ($fids && is_array($fids)) {
+    if ($fids !== null && is_array($fids)) {
       $files = $this->em->getRepository(Files::class)->findBy([
         'id' => $fids
       ], [
@@ -140,7 +136,6 @@ class FilesUploadJsType extends AbstractType {
   }
 
   public function buildView(FormView $view, FormInterface $form, array $options): void {
-    $this->isMultiple = $options['multiple'];
     parent::buildView($view, $form, $options);
     $view->vars['attr']['class'] = 'files-upload-js-container';
     $view->vars['attr']['data-max-size'] = $options['max_size'];

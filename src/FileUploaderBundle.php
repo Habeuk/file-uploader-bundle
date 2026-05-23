@@ -13,6 +13,7 @@ final class FileUploaderBundle extends AbstractBundle {
    * Configs internes au bundle
    *
    * {@inheritdoc}
+   * @param array<mixed> $config
    * @see \Symfony\Component\HttpKernel\Bundle\AbstractBundle::loadExtension()
    */
   public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void {
@@ -72,8 +73,8 @@ final class FileUploaderBundle extends AbstractBundle {
           'delete_on_update' => true
         ],
         'privateFile' => [
-          'uri_prefix' => '/uploads/public',
-          'upload_destination' => '%kernel.project_dir%/public/uploads/public',
+          'uri_prefix' => '/var/storage/private',
+          'upload_destination' => '%kernel.project_dir%/var/storage/private',
           'namer' => 'Habeuk\FileUploaderBundle\Naming\FilesSlugNamer',
           'directory_namer' => [
             'service' => 'Vich\UploaderBundle\Naming\SubdirDirectoryNamer',
