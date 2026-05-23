@@ -1,0 +1,16 @@
+{
+    "name": "habeuk/file-uploader-bundle",
+    "version": "1.0.0",
+    "description": "Gestionnaire d'upload de fichiers pour Symfony 8 avec Tailwind CSS",
+    "main": "assets/controllers/upload_files_controller.js",
+    "peerDependencies": {
+        "@hotwired/stimulus": "^3.0.0"
+    },
+    "symfony": {
+        "controllers": "assets/controllers.json"
+    },
+    "dependencies": {
+        "basic_axios": "file:../../AppVuejs/basic_axios",
+        "core-js": "^3.49.0"
+    }
+}

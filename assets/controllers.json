@@ -1,0 +1,10 @@
+{
+    "controllers": {
+        "upload-files": {
+            "main": "controllers/upload_files_controller.js",
+            "enabled": true,
+            "fetch": "eager"
+        }
+    },
+    "entrypoints": []
+}

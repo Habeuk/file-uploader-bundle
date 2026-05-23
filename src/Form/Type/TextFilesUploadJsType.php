@@ -1,7 +1,7 @@
 <?php
-namespace App\Form\Type;
+namespace Habeuk\FileUploaderBundle\Form\Type;
 
-use App\Entity\Files;
+use Habeuk\FileUploaderBundle\Entity\Files;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;

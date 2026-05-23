@@ -26,6 +26,7 @@ class FilesUploadJsType extends AbstractType {
       'multiple' => false,
       'max_size' => '10M',
       'type' => 'document',
+      'private_file' => false,
       'mime_types' => [
         'image/*'
       ],
@@ -36,6 +37,7 @@ class FilesUploadJsType extends AbstractType {
 
     $resolver->setAllowedTypes('max_size', 'string');
     $resolver->setAllowedTypes('mime_types', 'array');
+    $resolver->setAllowedTypes('private_file', 'bool');
     $resolver->setAllowedTypes('preview_template', [
       'string',
       'null'
@@ -43,6 +45,8 @@ class FilesUploadJsType extends AbstractType {
   }
 
   public function buildForm(FormBuilderInterface $builder, array $options): void {
+    /** @var bool $isMultiple */
+    $isMultiple = $options['multiple'];
     $constraints = [];
     if ($options['required']) {
       $constraints = $options['multiple'] ? [
@@ -63,16 +67,21 @@ class FilesUploadJsType extends AbstractType {
     ]);
 
     // Transformer pour convertir entre les IDs et les entités Files
-    $builder->addModelTransformer(new CallbackTransformer([
-      $this,
-      'transform'
-    ], [
-      $this,
-      'reverseTransform'
-    ]));
+    // $builder->addModelTransformer(new CallbackTransformer([
+    // $this,
+    // 'transform'
+    // ], [
+    // $this,
+    // 'reverseTransform'
+    // ]));
+    $builder->addModelTransformer(new CallbackTransformer(function (mixed $modelData) use ($isMultiple): array {
+      return $this->transformToView($modelData, $isMultiple);
+    }, function (mixed $viewData) use ($isMultiple): mixed {
+      return $this->reverseTransformToModel($viewData, $isMultiple);
+    }));
   }
 
-  public function transform(mixed $datas): mixed {
+  public function transformToView(mixed $datas, bool $isMultiple): mixed {
     // De l'entité vers le formulaire (model → view)
     if (empty($datas)) {
       return [
@@ -108,10 +117,10 @@ class FilesUploadJsType extends AbstractType {
     }
   }
 
-  public function reverseTransform(mixed $data): mixed {
+  public function reverseTransformToModel(mixed $data, bool $isMultiple): mixed {
     // Du formulaire vers l'entité (view → model)
     if (! is_array($data) || empty($data['fids'])) {
-      return $this->isMultiple ? new ArrayCollection() : null;
+      return $isMultiple ? new ArrayCollection() : null;
     }
     $fids = $data['fids'];
     if (is_numeric($fids)) {
@@ -138,6 +147,7 @@ class FilesUploadJsType extends AbstractType {
     $view->vars['attr']['data-mime-types'] = implode(",", $options['mime_types']);
     $view->vars['attr']['data-type'] = $options['type'];
     $view->vars['attr']['data-csrf-token'] = $this->csrfTokenManager->getToken('files_upload_js')->getValue();
+    $view->vars['attr']['data-private-file'] = (bool) $options['private_file'];
     $view->vars['multiple'] = $options['multiple'];
     $view->vars['text_display_upload'] = $options['text_display_upload'];
   }

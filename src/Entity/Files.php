@@ -69,7 +69,7 @@ class Files {
   /**
    * Champ pour les fichiers PUBLICS
    */
-  #[Vich\UploadableField(mapping: 'public_files', fileNameProperty: 'fileName', size: 'fileSize', mimeType: 'mimeType', originalName: 'originalName')]
+  #[Vich\UploadableField(mapping: 'publicFile', fileNameProperty: 'fileName', size: 'fileSize', mimeType: 'mimeType', originalName: 'originalName')]
   #[Assert\File(maxSize: '25M', maxSizeMessage: 'Le fichier est trop lourd ({{ size }} {{ suffix }}). Maximum autorisé : {{ limit }} {{ suffix }}', mimeTypes: AllowedMimeType::DEFAULT_VALUES, mimeTypesMessage: "Type de fichier non autorisé.")]
   #[Ignore]
   private ?File $publicFile = null;
@@ -77,12 +77,12 @@ class Files {
   /**
    * Champ pour les fichiers PRIVÉS
    */
-  #[Vich\UploadableField(mapping: 'private_files', fileNameProperty: 'fileName', size: 'fileSize', mimeType: 'mimeType', originalName: 'originalName')]
+  #[Vich\UploadableField(mapping: 'privateFile', fileNameProperty: 'fileName', size: 'fileSize', mimeType: 'mimeType', originalName: 'originalName')]
   #[Assert\File(maxSize: '25M', maxSizeMessage: 'Le fichier est trop lourd ({{ size }} {{ suffix }}). Maximum autorisé : {{ limit }} {{ suffix }}', mimeTypes: AllowedMimeType::DEFAULT_VALUES, mimeTypesMessage: "Type de fichier non autorisé.")]
   #[Ignore]
   private ?File $privateFile = null;
 
-  #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'files')]
+  #[ORM\ManyToOne(targetEntity: User::class)]
   #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
   private ?User $user = null;
 

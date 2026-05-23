@@ -1,7 +1,7 @@
 {# templates/form/types/files_upload_js.html.twig #}
 {% block files_upload_js_widget %}    
 <div class="w-full" 
-     {{ stimulus_controller('upload-files') }} 
+     {{ stimulus_controller('file_uploader_bundle') }}
      {{ block('widget_container_attributes') }}>
     
     {# Le champ caché contenant les IDs soumis au serveur #}
