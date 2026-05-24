@@ -114,13 +114,11 @@ final class TextFilesUploadJsType extends AbstractType {
         'fids' => null
       ];
     }
-
     if ($modelData instanceof Files) {
       return [
         'fids' => $modelData->getId()
       ];
     }
-
     if ($modelData instanceof Collection) {
       $fids = [];
       foreach ($modelData as $file) {
@@ -128,12 +126,10 @@ final class TextFilesUploadJsType extends AbstractType {
           $fids[] = $file->getId();
         }
       }
-
       return [
         'fids' => ! empty($fids) ? (json_encode($fids) ?: null) : null
       ];
     }
-
     throw new \UnexpectedValueException(sprintf('Type de données inattendu : %s', get_debug_type($modelData)));
   }
 

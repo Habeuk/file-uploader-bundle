@@ -8,9 +8,10 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Shared\Doctrine\Traits\ {
+use Habeuk\FileUploaderBundle\Shared\Doctrine\Traits\ {
   TimestampableTrait,
-  UuidTrait
+  UuidTrait,
+  OwnerTrait
 };
 use Habeuk\FileUploaderBundle\Enum\AllowedMimeType;
 use Doctrine\DBAL\Types\Types;
@@ -21,6 +22,7 @@ use Doctrine\DBAL\Types\Types;
 class Files {
   use TimestampableTrait;
   use UuidTrait;
+  use OwnerTrait;
 
   #[ORM\Id]
   #[ORM\GeneratedValue]
@@ -82,10 +84,6 @@ class Files {
   #[Ignore]
   private ?File $privateFile = null;
 
-  #[ORM\ManyToOne(targetEntity: User::class)]
-  #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-  private ?User $user = null;
-
   #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
   protected \DateTimeImmutable $createdAt;
 
@@ -124,6 +122,10 @@ class Files {
   }
 
   public function getPrivateAccess(): bool {
+    return $this->privateAccess;
+  }
+
+  public function isPrivateFile(): bool {
     return $this->privateAccess;
   }
 
@@ -194,19 +196,6 @@ class Files {
 
   public function setDescription(string $description): self {
     $this->description = $description;
-    return $this;
-  }
-
-  public function getUser(): ?User {
-    return $this->user;
-  }
-
-  public function setUser(User $user): self {
-    // Si on a deja assigné l'utilisateur. on ignore le reste.
-    if (isset($this->user) && $this->user === $user) {
-      return $this;
-    }
-    $this->user = $user;
     return $this;
   }
 

@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Habeuk\FileUploaderBundle\Entity\ {
   Files
 };
+use Habeuk\FileUploaderBundle\Service\FileAccessService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,9 +28,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UploadFilesController extends AbstractController {
 
+  function __construct(private readonly FileAccessService $fileAccess) {}
+
   #[Route('/image/upload', name: 'file_uploader_bundle_ckeditor')]
   #[IsGranted('ROLE_ADMIN')]
-  public function imageUploadCkeditor(Request $request, EntityManagerInterface $em, UploaderHelper $uploaderHelper, CacheManager $imagineCacheManager): JsonResponse {
+  public function imageUploadCkeditor(Request $request, EntityManagerInterface $em): JsonResponse {
     $datas = [];
 
     $image = $request->files->get('upload');
@@ -44,7 +47,7 @@ class UploadFilesController extends AbstractController {
       $fileEntity->setType('ckeditor');
       $em->persist($fileEntity);
       $em->flush();
-      $datas = $this->formatResponseData($fileEntity, 'publicFile', $uploaderHelper, $imagineCacheManager);
+      $datas = $this->fileAccess->getFileData($fileEntity);
     }
     return $this->json($datas, 200, []);
   }
@@ -52,8 +55,7 @@ class UploadFilesController extends AbstractController {
   #[Route('/file-uploader-bundle/upload/files', name: 'file_uploader_bundle_files', methods: [
     'POST'
   ])]
-  public function CreateFiles(Request $request, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager, UploaderHelper $uploaderHelper,
-    CacheManager $imagineCacheManager): JsonResponse {
+  public function CreateFiles(Request $request, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): JsonResponse {
     $token = (string) $request->request->get('_token_csrf');
     if (! $csrfTokenManager->isTokenValid(new CsrfToken('files_upload_js', $token))) {
       return $this->json([
@@ -78,86 +80,11 @@ class UploadFilesController extends AbstractController {
         $entitiesSaved[] = $fileEntity;
       }
       $em->flush();
-      foreach ($entitiesSaved as $entity) {
-        $datas[] = $this->formatResponseData($entity, $fieldName, $uploaderHelper, $imagineCacheManager);
+      foreach ($entitiesSaved as $fileEntity) {
+        $datas[] = $this->fileAccess->getFileData($fileEntity);
       }
     }
     return $this->json($datas);
-  }
-
-  /**
-   * Formate les données de réponse selon le type de fichier.
-   *
-   * @param Files $entity
-   * @param string $fieldName
-   * @param UploaderHelper $uploaderHelper
-   * @param CacheManager $imagineCacheManager
-   * @return array<string, mixed>
-   */
-  private function formatResponseData(Files $entity, string $fieldName, UploaderHelper $uploaderHelper, CacheManager $imagineCacheManager): array {
-    $originalPath = $uploaderHelper->asset($entity, $fieldName);
-    $fileType = $entity->getMediaType();
-    $data = [
-      'id' => $entity->getId(),
-      'fileName' => $entity->getOriginalName() ?? $entity->getFileName(),
-      'url' => $originalPath,
-      'type' => $fileType,
-      'mimeType' => $entity->getMimeType(),
-      'size' => $this->formatFileSize($entity->getFileSize()),
-      'icon' => $this->getFileIcon($fileType)
-    ];
-    // Miniature uniquement pour les images publiques
-    if ($fileType === 'image' && $fieldName === 'publicFile') {
-      try {
-        if ($originalPath !== null) {
-          $data['thumbnail'] = $imagineCacheManager->getBrowserPath($originalPath, 'cadre_max_100x100_');
-        }
-      }
-      catch (\Exception) {
-        $data['thumbnail'] = $originalPath;
-      }
-    }
-    // Pour les fichiers privés, ne pas exposer l'URL directe
-    if ($fieldName === 'privateFile') {
-      $data['url'] = null; // Pas d'accès direct
-      $data['isPrivate'] = true;
-    }
-    return $data;
-  }
-
-  /**
-   * Retourne une icône FontAwesome selon le type de fichier.
-   */
-  private function getFileIcon(string $type): string {
-    return match ($type) {
-      'image' => 'fa-file-image',
-      'pdf' => 'fa-file-pdf',
-      'archive' => 'fa-file-zipper',
-      'document' => 'fa-file-lines',
-      'audio' => 'fa-file-audio',
-      'video' => 'fa-file-video',
-      default => 'fa-file'
-    };
-  }
-
-  /**
-   * Formate la taille du fichier en taille lisible.
-   */
-  private function formatFileSize(?int $bytes): string {
-    if ($bytes === null || $bytes === 0) {
-      return '0 B';
-    }
-
-    $units = [
-      'B',
-      'KB',
-      'MB',
-      'GB',
-      'TB'
-    ];
-    $i = (int) floor(log($bytes, 1024));
-
-    return round($bytes / (1024 ** $i), 1) . ' ' . $units[$i];
   }
 
   /**

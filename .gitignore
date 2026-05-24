@@ -35,3 +35,10 @@ yarn-error.log
 ###> liip/imagine-bundle ###
 /public/media/cache/
 ###< liip/imagine-bundle ###
+
+###> Eclipse ###
+.buildpath
+.project
+.settings
+###< Eclipse ###
+
