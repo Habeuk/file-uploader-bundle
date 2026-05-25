@@ -215,7 +215,8 @@ class FileAccessService {
     else $file = $this->filesRepository->find($data);
 
     if ($file === null) {
-      throw new NotFoundHttpException(sprintf('Fichier #%d introuvable.', $data));
+      $id = $data instanceof Files ? $data->getId() : $data;
+      throw new NotFoundHttpException(sprintf('Fichier #%d introuvable.', $id));
     }
     return $file;
   }

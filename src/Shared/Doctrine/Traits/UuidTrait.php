@@ -21,7 +21,7 @@ trait UuidTrait {
       $this->uuid = Uuid::v4();
   }
 
-  public function getUuid(): ?string {
+  public function getUuid(): ?Uuid {
     return $this->uuid;
   }
 

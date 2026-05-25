@@ -41,7 +41,7 @@ class UploadFilesController extends AbstractController {
       $fileEntity = new Files();
       $user = $this->getUser();
       if ($user !== null && $user instanceof User) {
-        $fileEntity->setUser($user);
+        $fileEntity->setOwner($user);
       }
       $fileEntity->setPublicFile($image);
       $fileEntity->setType('ckeditor');
@@ -75,7 +75,7 @@ class UploadFilesController extends AbstractController {
         $this->hydrateEntity($fileEntity, $data);
         $user = $this->getUser();
         if ($user !== null && $user instanceof User)
-          $fileEntity->setUser($user);
+          $fileEntity->setOwner($user);
         $em->persist($fileEntity);
         $entitiesSaved[] = $fileEntity;
       }
