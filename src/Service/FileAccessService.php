@@ -210,13 +210,12 @@ class FileAccessService {
    * Trouve un fichier ou lance une exception.
    */
   private function findFileOrFail(Files|int $data): Files {
-    if ($data instanceof Files)
-      $file = $data;
-    else $file = $this->filesRepository->find($data);
-
+    if ($data instanceof Files) {
+      return $data;
+    }
+    $file = $this->filesRepository->find($data);
     if ($file === null) {
-      $id = $data instanceof Files ? $data->getId() : $data;
-      throw new NotFoundHttpException(sprintf('Fichier #%d introuvable.', $id));
+      throw new NotFoundHttpException(sprintf('Fichier #%d introuvable.', $data));
     }
     return $file;
   }

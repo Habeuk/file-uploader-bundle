@@ -15,5 +15,8 @@
         }
     ],
     "minimum-stability" : "dev",
-    "require": {}
+    "require": {
+    	"vich/uploader-bundle": "^2.9",
+    	"liip/imagine-bundle": "^2.17"
+    }
 }

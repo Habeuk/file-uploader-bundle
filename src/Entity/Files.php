@@ -100,6 +100,10 @@ class Files {
     return $this->publicFile;
   }
 
+  public function setFile(?File $file): void {
+    $this->setPublicFile($file);
+  }
+
   public function setPublicFile(?File $file): void {
     $this->publicFile = $file;
     $this->updatedAt = new \DateTimeImmutable();

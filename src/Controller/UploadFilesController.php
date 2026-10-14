@@ -34,7 +34,6 @@ class UploadFilesController extends AbstractController {
   #[IsGranted('ROLE_ADMIN')]
   public function imageUploadCkeditor(Request $request, EntityManagerInterface $em): JsonResponse {
     $datas = [];
-
     $image = $request->files->get('upload');
     if ($image !== null) {
       /** @var  \Symfony\Component\HttpFoundation\File\UploadedFile $image */
